@@ -37,9 +37,28 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "Authentication",
+    "corsheaders",
+    "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Enables JWT authentication for DRF
+    ),
+}
+
+from datetime import timedelta  # Import timedelta for setting token expiration times
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Access token is valid for 1 day
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh token is valid for 7 days
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Tokens must be sent as 'Bearer <token>' in Authorization header
+}
+
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -48,6 +67,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "Backend.urls"
 
@@ -129,3 +150,15 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = 'Authentication.User'
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "aryan223653badkul@gmail.com"  # Replace with your email
+EMAIL_HOST_PASSWORD = "cbgn zldz jdxs cqed"  # Use an App Password if 2FA is enabled
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
