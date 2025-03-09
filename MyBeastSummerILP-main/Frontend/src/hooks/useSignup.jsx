@@ -16,7 +16,7 @@ const UseSignup = () => {
       const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
       const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-      const response = await fetch('http://127.0.0.1:8000/api/authentication/create-user/', {
+      const response = await fetch('http://127.0.0.1:8001/api/authentication/create-user/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -18,11 +18,14 @@ const UseRegisterProjects = (props) => {
       // Get CSRF token from cookies
       const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
       const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
+      const accessToken = localStorage.getItem('accessToken');
+      console.log('userData in registerProjects:', userData);
 
-      const response = await fetch('http://127.0.0.1:8000/api/registration/register/', {
+      const response = await fetch('http://127.0.0.1:8001/api/registration/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
           'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify(userData),

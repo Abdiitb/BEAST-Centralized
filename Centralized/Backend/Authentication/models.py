@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 import uuid
 from .options import HOSTEL_CHOICES
+from django.db import connections
 
 # Custom User Manager for handling user creation
 class UserManager(BaseUserManager):
@@ -52,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_active = models.BooleanField(default=False)  # Determines if user can log in
     is_staff = models.BooleanField(default=False)  # Grants admin panel access if True
+    is_verified = models.BooleanField(default=False)
 
     objects = UserManager()  # Assigning UserManager to handle user creation
 
@@ -73,6 +75,23 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)  # Short bio of the user
     # profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)  # User's profile picture
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional phone number
+
+    def save(self, *args, **kwargs):
+        """Save to all databases when a profile is updated."""
+        super().save(*args, **kwargs)  # Save to the default (centralized) database
+
+        # Synchronize changes to subsidiary databases
+        for db in ['ilp']:
+            with connections[db].cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO Authentication_profile (user_id, bio, phone_number)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (user_id) DO UPDATE
+                    SET bio = EXCLUDED.bio, phone_number = EXCLUDED.phone_number
+                    """,
+                    [self.user_id, self.bio, self.phone_number]
+                )
 
     def __str__(self):
         """

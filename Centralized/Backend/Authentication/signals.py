@@ -43,3 +43,14 @@ def delete_user_profile(sender, instance, **kwargs):
         instance.profile.delete()  # Delete the associated profile
     except Profile.DoesNotExist:
         print("Profile does not exist")
+
+@receiver(post_save, sender=Profile)
+def sync_profile(sender, instance, **kwargs):
+    """Sync profile updates to all databases when the profile is saved."""
+    databases = ['subsidiary_1', 'subsidiary_2']
+
+    for db in databases:
+        Profile.objects.using(db).update_or_create(
+            user=instance.user,
+            defaults={"bio": instance.bio, "phone_number": instance.phone_number}
+        )

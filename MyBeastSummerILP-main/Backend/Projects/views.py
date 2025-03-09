@@ -8,19 +8,22 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ProjectSerializer
 from Registrations.models import WishList
-from Authentication.models import User
+from Authentication.models import Profile
+import requests
     
 class ProjectListAPIView(APIView):
-    def post(self, request, format=None, field=None):
-        accessToken = request.data['accessToken']
+    
+    def get(self, request, format=None, field=None):
+        token = request.headers.get("Authorization")
         try:
-            user = User.objects.get(accessToken=accessToken)
-            if(user.is_active == False):
-                return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
+            user = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            # print(user)
+            # if(user.is_active == False):
+            #     return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print("Error while fetching user", e)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        print(user)
+        # print(user)
         if(field is None):
             projects = Project.objects.all()
         else:
@@ -44,64 +47,64 @@ class ProjectListAPIView(APIView):
         return Response(serialized_projects, status=status.HTTP_200_OK)
 
 
-def add_projects_from_local_csv():
-        try:
-            csv_file_path = os.path.join(os.path.dirname(__file__), '../MentorData/data2.csv')
+# def add_projects_from_local_csv():
+#         try:
+#             csv_file_path = os.path.join(os.path.dirname(__file__), '../MentorData/data2.csv')
             
-            # Read the local CSV file
-            with open(csv_file_path, 'r') as file:
-                csv_reader = csv.DictReader(file)
+#             # Read the local CSV file
+#             with open(csv_file_path, 'r') as file:
+#                 csv_reader = csv.DictReader(file)
                 
-                # Loop through each row in the CSV file and create Mentor instances
-                for row in csv_reader:
-                    try:
-                        project = Project(
-                        project_name=row['project_name'],
-                        project_desc=row['project_desc']
-                        )
-                        project.save()
-                    except Exception as e:
-                        print('Error saving project: ', row['project_name'], e)
-                        pass
+#                 # Loop through each row in the CSV file and create Mentor instances
+#                 for row in csv_reader:
+#                     try:
+#                         project = Project(
+#                         project_name=row['project_name'],
+#                         project_desc=row['project_desc']
+#                         )
+#                         project.save()
+#                     except Exception as e:
+#                         print('Error saving project: ', row['project_name'], e)
+#                         pass
                 
-        except Exception as e:
-            print('Failed to add data: ', e)
+#         except Exception as e:
+#             print('Failed to add data: ', e)
 
     
 
 
-import csv
-from django.http import HttpResponse
-from django.shortcuts import render
-from .models import Project
-import os
+# import csv
+# from django.http import HttpResponse
+# from django.shortcuts import render
+# from .models import Project
+# import os
 
-def import_projects_from_csv():
-        file_path = os.path.join(os.path.dirname(__file__), '../projectData/ilp2023.csv')
+# def import_projects_from_csv():
+#         file_path = os.path.join(os.path.dirname(__file__), '../projectData/ilp2023.csv')
         
         
 
-        with open(file_path, 'r', encoding='utf-8') as csv_file:
-            reader = csv.DictReader(csv_file)
+#         with open(file_path, 'r', encoding='utf-8') as csv_file:
+#             reader = csv.DictReader(csv_file)
 
-            for row in reader:
-                project = Project(
-                    preferred_dept=row['\ufeffdept'],
-                    project_title=row['title'],
-                    project_ps=row['ps'],
-                    preferred_program=row['program'],
-                    company_name=row['company'],
-                    type_of_project=row['type'],
-                    pre_reqs=row['pre'],
-                    city=row['city'],
-                    accomodation=row['accomodation'],
-                    travelling_expenses=row['travel'],
-                    stipend=row['stipend'],
-                    duration=row['duration'],
-                )
-                project.save()
+#             for row in reader:
+#                 project = Project(
+#                     preferred_dept=row['\ufeffdept'],
+#                     project_title=row['title'],
+#                     project_ps=row['ps'],
+#                     preferred_program=row['program'],
+#                     company_name=row['company'],
+#                     type_of_project=row['type'],
+#                     pre_reqs=row['pre'],
+#                     city=row['city'],
+#                     accomodation=row['accomodation'],
+#                     travelling_expenses=row['travel'],
+#                     stipend=row['stipend'],
+#                     duration=row['duration'],
+#                 )
+#                 project.save()
 
-        print('done')
+#         print('done')
         
 
 
@@ -126,14 +129,14 @@ def import_projects_from_csv():
 #     certificates_and_lors_provided = models.TextField(default=False, help_text='Will certificates and LoRs be provided to the students on successfully completing the project?')
 
 
-def export_projects_to_csv(modeladmin, request, queryset):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="user_details.csv"'
+# def export_projects_to_csv(modeladmin, request, queryset):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="user_details.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(['Project ID', 'Project Title', 'Problem Statement', 'Preferred Department', 'Preferred Program', 'Company Name', 'Type of Project', 'Pre-requisites', 'City', 'Accomodation', 'Travelling Expenses', 'Stipend', 'Duration'])
+#     writer = csv.writer(response)
+#     writer.writerow(['Project ID', 'Project Title', 'Problem Statement', 'Preferred Department', 'Preferred Program', 'Company Name', 'Type of Project', 'Pre-requisites', 'City', 'Accomodation', 'Travelling Expenses', 'Stipend', 'Duration'])
 
-    for project in queryset:
-        writer.writerow([project.pk, project.project_title, project.problem_statement, project.departments_eligible, project.program_and_year, project.company_name_designation, project.type_of_project, project.prerequisites, project.city_of_posting, project.accommodation_provided, project.travel_expenses_covered, project.stipend_per_month, project.duration_weeks])
+#     for project in queryset:
+#         writer.writerow([project.pk, project.project_title, project.problem_statement, project.departments_eligible, project.program_and_year, project.company_name_designation, project.type_of_project, project.prerequisites, project.city_of_posting, project.accommodation_provided, project.travel_expenses_covered, project.stipend_per_month, project.duration_weeks])
 
-    return response
+#     return response

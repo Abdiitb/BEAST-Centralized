@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegistrationSerializer, WishListSerializer
-from Authentication.models import User, Profile
+from Authentication.models import Profile
 from .models import Registration, WishList
 from Projects.serializers import ProjectSerializer
 from Projects.models import Project
@@ -12,27 +12,30 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import smtplib
 import os
+import requests
 
 
 class RegistrationAPIView(APIView):
     def post(self, request):
-        accessToken = request.data['accessToken']
+        token = request.headers.get("Authorization")
         try:
-            user = User.objects.get(accessToken=accessToken)
-            if(user.is_active == False):
-                return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
-            if(not Profile.objects.filter(user=user)[0]):
+            user_data = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json()
+            user = Profile.objects.get(id=user_data.get('id'))
+            # print(user)
+            if(not user):
                 return Response("Profile Not Found", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print("Error while fetching user", e)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        print(user)
-        request.data['user'] = user.id
+        # print('\nuser_data: ', user_data, '\n')
+        # print('\nuser: ', user, '\n')
+        # request.data['user'] = user_data.get('id')
         
         if(Registration.objects.filter(user=user)):
             return Response("Registration already exists", status=status.HTTP_400_BAD_REQUEST)
             
         serializer = RegistrationSerializer(data=request.data)
+        # print('\nserializer.is_valid: ', serializer.is_valid(), '\n')
         if serializer.is_valid():
             try:
                 serializer.save()
@@ -47,11 +50,10 @@ class RegistrationAPIView(APIView):
 
 class WishListAPIView(APIView):
     def post(self, request):
-        accessToken = request.data['accessToken']
+        token = request.headers.get("Authorization")
         try:
-            user = User.objects.get(accessToken=accessToken)
-            if(user.is_active == False):
-                return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
+            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user = Profile.objects.get(id=user_id)
         except Exception as e:
             print("Error while verifying user", e)
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -72,12 +74,10 @@ class WishListAPIView(APIView):
     
     
     def get(self, request):
+        token = request.headers.get("Authorization")
         try:
-            accessToken = request.query_params.get('accessToken')
-            user = User.objects.get(accessToken=accessToken)
-            
-            if not user.is_active:
-                return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
+            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user = Profile.objects.get(id=user_id)
             
             wishlist = WishList.objects.get(user=user)
             projects = []
@@ -91,7 +91,7 @@ class WishListAPIView(APIView):
             
             return Response(projects, status=status.HTTP_200_OK)
 
-        except User.DoesNotExist:
+        except Profile.DoesNotExist:
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
         except WishList.DoesNotExist:
@@ -103,16 +103,17 @@ class WishListAPIView(APIView):
 
     
     def put(self, request):
-        accessToken = request.data['accessToken']
+        token = request.headers.get("Authorization")
         try:
-            user = User.objects.get(accessToken=accessToken)
-            if(user.is_active == False):
-                return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)
+            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user = Profile.objects.get(id=user_id)
+            # print('user :', user)
         except Exception as e:
             print("Error while verifying user", e)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        print(user)
+        # print(user)
         try:
+            # print('Wishlist exist or not ?', WishList.objects.filter(user=user))
             if(not WishList.objects.filter(user=user)):
                 wishlist = WishList.objects.create(user=user)
             wishlist = WishList.objects.get(user=user)
@@ -128,130 +129,130 @@ class WishListAPIView(APIView):
         
 
 
-import csv
-from django.http import HttpResponse
-from .models import Registration
+# import csv
+# from django.http import HttpResponse
+# from .models import Registration
 
-def export_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="registration_data.csv"'
+# def export_csv(request):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="registration_data.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(['full name', 'contact', 'Email', 'sop', 'Personal email', 'linkedin', 'Pref1 ID', 'Pref1 Name', 'Pref2 ID', 'Pref2 Name', 'Pref3 ID', 'Pref3 Name', 'Pref4 ID', 'Pref4 Name', 'Pref5 ID', 'Pref5 Name'])
+#     writer = csv.writer(response)
+#     writer.writerow(['full name', 'contact', 'Email', 'sop', 'Personal email', 'linkedin', 'Pref1 ID', 'Pref1 Name', 'Pref2 ID', 'Pref2 Name', 'Pref3 ID', 'Pref3 Name', 'Pref4 ID', 'Pref4 Name', 'Pref5 ID', 'Pref5 Name'])
 
-    registrations = Registration.objects.select_related('user', 'pref1', 'pref2', 'pref3', 'pref4', 'pref5').all()
+#     registrations = Registration.objects.select_related('user', 'pref1', 'pref2', 'pref3', 'pref4', 'pref5').all()
 
-    for registration in registrations:
-        profile = Profile.objects.filter(user=registration.user)[0]
-        writer.writerow([
-            registration.user.fullname,
-            registration.user.contact,
-            registration.user.ldap,
-            profile.sop,
-            profile.personal_email,
-            profile.linkedin,
-            registration.pref1.id,
-            registration.pref1.fullname,
-            registration.pref2.id,
-            registration.pref2.fullname,
-            registration.pref3.id,
-            registration.pref3.fullname,
-            registration.pref4.id,
-            registration.pref4.fullname,
-            registration.pref5.id,
-            registration.pref5.fullname,
-        ])
+#     for registration in registrations:
+#         profile = Profile.objects.filter(user=registration.user)[0]
+#         writer.writerow([
+#             registration.user.fullname,
+#             registration.user.contact,
+#             registration.user.ldap,
+#             profile.sop,
+#             profile.personal_email,
+#             profile.linkedin,
+#             registration.pref1.id,
+#             registration.pref1.fullname,
+#             registration.pref2.id,
+#             registration.pref2.fullname,
+#             registration.pref3.id,
+#             registration.pref3.fullname,
+#             registration.pref4.id,
+#             registration.pref4.fullname,
+#             registration.pref5.id,
+#             registration.pref5.fullname,
+#         ])
 
-    return response
-
-
+#     return response
 
 
-def export_csv_wishlist(request, queryset):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="wishlist_data.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(['fullname', 'context', 'email', 'Mentor IDs', 'Mentor Names'])
 
-    for wishlist in WishList.objects.all():
-        projects_ids = [str(mentor.id) for mentor in wishlist.projects.all()]
-        projects_names = [mentor.fullname for mentor in wishlist.projects.all()]
+# def export_csv_wishlist(request, queryset):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="wishlist_data.csv"'
 
-        writer.writerow([
-            wishlist.user.fullname,
-            wishlist.user.contact,
-            wishlist.user.ldap,
-            ', '.join(projects_ids),
-            ', '.join(projects_names),
-        ])
+#     writer = csv.writer(response)
+#     writer.writerow(['fullname', 'context', 'email', 'Mentor IDs', 'Mentor Names'])
 
-    return response
+#     for wishlist in WishList.objects.all():
+#         projects_ids = [str(mentor.id) for mentor in wishlist.projects.all()]
+#         projects_names = [mentor.fullname for mentor in wishlist.projects.all()]
 
-def export_registrations_to_csv(modeladmin, request, queryset):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="registrations_details.csv"'
+#         writer.writerow([
+#             wishlist.user.fullname,
+#             wishlist.user.contact,
+#             wishlist.user.ldap,
+#             ', '.join(projects_ids),
+#             ', '.join(projects_names),
+#         ])
 
-    writer = csv.writer(response)
-    writer.writerow(['Project ID', 'Project Title', 'User IDs Pref 1', 'User IDs Pref 2', 'User IDs Pref 3', 'User IDs Pref 4', 'User IDs Pref 5'])
+#     return response
+
+# def export_registrations_to_csv(modeladmin, request, queryset):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="registrations_details.csv"'
+
+#     writer = csv.writer(response)
+#     writer.writerow(['Project ID', 'Project Title', 'User IDs Pref 1', 'User IDs Pref 2', 'User IDs Pref 3', 'User IDs Pref 4', 'User IDs Pref 5'])
     
-    projects = Project.objects.all()
+#     projects = Project.objects.all()
     
 
-    for project in projects:
+#     for project in projects:
         
-        registration1 = Registration.objects.filter(pref1=project)
-        registration2 = Registration.objects.filter(pref2=project)
-        registration3 = Registration.objects.filter(pref3=project)
-        registration4 = Registration.objects.filter(pref4=project)
-        registration5 = Registration.objects.filter(pref5=project)
+#         registration1 = Registration.objects.filter(pref1=project)
+#         registration2 = Registration.objects.filter(pref2=project)
+#         registration3 = Registration.objects.filter(pref3=project)
+#         registration4 = Registration.objects.filter(pref4=project)
+#         registration5 = Registration.objects.filter(pref5=project)
         
-        users1 = []
-        users2 = []
-        users3 = []
-        users4 = []
-        users5 = []
+#         users1 = []
+#         users2 = []
+#         users3 = []
+#         users4 = []
+#         users5 = []
         
         
-        for reg in registration1:
-            users1.append(reg.user)
+#         for reg in registration1:
+#             users1.append(reg.user)
         
-        for user in users1:
-            if user.id == 1:
-                users1.insert(0, users1.pop(users1.index(user)))
+#         for user in users1:
+#             if user.id == 1:
+#                 users1.insert(0, users1.pop(users1.index(user)))
         
-        for reg in registration2:
-            users2.append(reg.user)
+#         for reg in registration2:
+#             users2.append(reg.user)
         
-        for user in users2:
-            if user.id == 1:
-                users2.insert(0, users2.pop(users2.index(user)))
+#         for user in users2:
+#             if user.id == 1:
+#                 users2.insert(0, users2.pop(users2.index(user)))
         
-        for reg in registration3:
-            users3.append(reg.user)
+#         for reg in registration3:
+#             users3.append(reg.user)
             
-        for user in users3:
-            if user.id == 1:
-                users3.insert(0, users3.pop(users3.index(user)))
+#         for user in users3:
+#             if user.id == 1:
+#                 users3.insert(0, users3.pop(users3.index(user)))
         
-        for reg in registration4:
-            users4.append(reg.user)
+#         for reg in registration4:
+#             users4.append(reg.user)
             
-        for user in users4:
-            if user.id == 1:
-                users4.insert(0, users4.pop(users4.index(user)))
+#         for user in users4:
+#             if user.id == 1:
+#                 users4.insert(0, users4.pop(users4.index(user)))
         
-        for reg in registration5:
-            users5.append(reg.user)
+#         for reg in registration5:
+#             users5.append(reg.user)
             
-        for user in users5:
-            if user.id == 1:
-                users5.insert(0, users5.pop(users5.index(user)))
+#         for user in users5:
+#             if user.id == 1:
+#                 users5.insert(0, users5.pop(users5.index(user)))
         
         
-        writer.writerow([project.id, project.project_title, ', '.join([str(user.id) for user in users1]), ', '.join([str(user.id) for user in users2]), ', '.join([str(user.id) for user in users3]), ', '.join([str(user.id) for user in users4]), ', '.join([str(user.id) for user in users5])])
+#         writer.writerow([project.id, project.project_title, ', '.join([str(user.id) for user in users1]), ', '.join([str(user.id) for user in users2]), ', '.join([str(user.id) for user in users3]), ', '.join([str(user.id) for user in users4]), ', '.join([str(user.id) for user in users5])])
 
-    return response
+#     return response
 
 
 

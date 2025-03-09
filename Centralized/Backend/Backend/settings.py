@@ -106,6 +106,15 @@ DATABASES = {
         'PASSWORD': 'centralized',
         'HOST': 'localhost',
         'PORT': '5432',
+    },
+
+    'ilp': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ilp',
+        'USER': 'aryan',
+        'PASSWORD': 'centralized',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -160,5 +169,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "aryan223653badkul@gmail.com"  # Replace with your email
 EMAIL_HOST_PASSWORD = "cbgn zldz jdxs cqed"  # Use an App Password if 2FA is enabled
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+DATABASE_ROUTERS = ['Backend.database_router.ProfileRouter']
 
 

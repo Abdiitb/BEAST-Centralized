@@ -10,6 +10,7 @@ import UseDeleteFromWishlist from "../../hooks/useDeleteFromWishlist";
 import Swal from "sweetalert2";
 import UseFetchWishlist from "../../hooks/useFetchWishlist";
 import UseRegisterProjects from "../../hooks/useRegisterProjects";
+import UseFetchProfile from "../../hooks/useFetchProfile";
 
 const cardData = [
     {
@@ -170,6 +171,7 @@ export default function WishList(props) {
     const { fetchProjects, setError, loading, error, projects, setProjects } = UseFetchWishlist();
     const { deleteProject } = UseDeleteFromWishlist();
     const { registerProjects, error: registerError, success } = UseRegisterProjects(props);
+    const { fetchProfile, fetchedProfile } = UseFetchProfile();
 
     const styles = {
 
@@ -273,6 +275,9 @@ export default function WishList(props) {
         },
     };
 
+    useEffect(() => {
+        fetchProfile();
+    }, [])
 
     useEffect(() => {
         fetchProjects();
@@ -284,8 +289,11 @@ export default function WishList(props) {
 
     async function handleSubmit() {
         try {
-            const accessToken = localStorage.getItem('accessToken');
-            profile.accessToken = accessToken;
+            if(fetchedProfile){
+                profile.user = fetchedProfile.id
+            }
+            // const accessToken = localStorage.getItem('accessToken');
+            // profile.accessToken = accessToken;
 
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -382,14 +390,14 @@ export default function WishList(props) {
                 <p className="noteHeading" style={{ color: "black", fontSize: '24px', marginLeft: "20px", marginRight: "20px", textDecoration:"underline" }}>
                     Adding projects to the wishlist won't register you for the projects; you need to register for 5 projects on this page.
                 </p>
-                <button disabled={true} style={{ padding: "10px", margin: "30px", marginTop: "50px", width: "200px", cursor: "pointer" }}>
-                    Deadline Gone!</button>
+                {/* <button disabled={true} style={{ padding: "10px", margin: "30px", marginTop: "50px", width: "200px", cursor: "pointer" }}>
+                    Deadline Gone!</button> */}
                 </div>
             <div className="projectsContainer">
 
                 {projects && projects.map((project, index) => {
 
-                    console.log(project)
+                    // console.log(project)
                     return (<>
                         {
                             index % 2 === 0 ? (<div className="project-card-container">
@@ -513,7 +521,7 @@ export default function WishList(props) {
 
 
 
-{/* 
+
 
             <div id="register" style={{ paddingBottom: "20vh" }}>
                 <div className="profileform-area" style={styles.profileformArea}>
@@ -600,7 +608,7 @@ export default function WishList(props) {
                         Register Now !
                     </button>
                 </div>
-            </div>*/}
+            </div>
 
         </div> 
 

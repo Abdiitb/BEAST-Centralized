@@ -84,7 +84,7 @@ export default function AlumCard(props) {
 
         {projects && projects.map((project, index) => {
 
-          console.log(project)
+          // console.log(project)
           return (<>
             {
               index % 2 === 0 ? (<div className="project-card-container">

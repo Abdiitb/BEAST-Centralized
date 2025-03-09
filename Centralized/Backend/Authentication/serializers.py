@@ -27,6 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
     
 class ProfileSerializer(serializers.ModelSerializer):
+    user = RegisterSerializer()
     class Meta:
         model = Profile
         fields = "__all__"

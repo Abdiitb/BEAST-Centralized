@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'import_export',
     'Blog',
     'Registrations',
     'rest_framework',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -62,8 +64,9 @@ ROOT_URLCONF = "Backend.urls"
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-CSRF_TRUSTED_ORIGINS = ['https://ilpsummer.sarc-iitb.org', 'http://localhost:3000']
+# CSRF_TRUSTED_ORIGINS = ['https://ilpsummer.sarc-iitb.org']
 
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -110,9 +113,18 @@ WSGI_APPLICATION = "Backend.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # }
+
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ilp',
+        'USER': 'aryan',
+        'PASSWORD': 'centralized',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -159,4 +171,4 @@ STATIC_URL = "django_static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CSRF_TRUSTED_ORIGINS = ['https://ilpsummer.sarc-iitb.org']
+# CSRF_TRUSTED_ORIGINS = ['https://ilpsummer.sarc-iitb.org', 'http://localhost:3001', 'http://127.0.0.1:8001', 'http://127.0.0.1:3001']

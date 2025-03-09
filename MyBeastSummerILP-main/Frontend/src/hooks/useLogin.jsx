@@ -16,7 +16,7 @@ const UseLogin = () => {
             // Get CSRF token from cookies
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
-            const response = await fetch('http://127.0.0.1:8000/api/authentication/login/', {
+            const response = await fetch('http://127.0.0.1:8001/api/authentication/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,11 +25,12 @@ const UseLogin = () => {
                 },
                 body: JSON.stringify(userData),
             });
-
+            console.log(response);
             if (response.status === 200) {
                 setSuccess(true);
                 const jsonData = await response.json();
                 localStorage.setItem('accessToken', jsonData['accessToken']);
+                localStorage.setItem('refreshToken', jsonData['refreshToken']);
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',

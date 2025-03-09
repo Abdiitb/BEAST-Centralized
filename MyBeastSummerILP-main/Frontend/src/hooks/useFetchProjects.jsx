@@ -13,20 +13,23 @@ const UseFetchProjects = () => {
         setLoading(true);
         setError(null);
         setSuccess(false);
-        const userData = {
-            "accessToken": localStorage.getItem('accessToken'),
-        }
+        // const userData = {
+        //     "accessToken": localStorage.getItem('accessToken'),
+        // }
+
+        const token = localStorage.getItem('accessToken');
 
         try {
             // Get CSRF token from cookies
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-            axios.post(`http://127.0.0.1:8000/api/projects/`, userData , {
+            axios.get(`http://127.0.0.1:8001/api/projects/`,{
                 headers: {
                     'Content-Type': 'application/json',
                     // Include CSRF token in headers
-                    'X-CSRFToken': csrfToken,
+                    'Authorization': `Bearer ${token}`,
+                    // 'X-CSRFToken': csrfToken,
                 },
             }).then(async (response) => {
                 if (response.status === 200) {

@@ -1,6 +1,6 @@
 from django.db import models
 from Projects.models import Project
-from Authentication.models import User
+from Authentication.models import Profile
 
 # Create your models here.
 
@@ -11,7 +11,7 @@ class Blog(models.Model):
     is_interview_schedule = models.BooleanField(default=False)
     interview_date = models.TextField(blank=True)
     interview_project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
-    interview_schedule_or_shortlisted_students_or_final_students = models.ManyToManyField(User, blank=True)
+    interview_schedule_or_shortlisted_students_or_final_students = models.ManyToManyField(Profile, blank=True)
     interview_mode = models.TextField(blank=True)
     interview_times = models.TextField(blank=True)
     is_interview_shortlist = models.BooleanField(default=False)

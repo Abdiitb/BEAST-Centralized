@@ -13,18 +13,20 @@ const UseDeleteFromWishlist = () => {
         setError(null);
         setSuccess(false);
         const userData = {
-            "accessToken": localStorage.getItem('accessToken'),
             "mentor": id,
         }
+
+        const accessToken = localStorage.getItem('accessToken')
 
         try {
             // Get CSRF token from cookies
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
           const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-            const response = await axios.post(`http://127.0.0.1:8000/api/registration/wishlist/`, userData, {
+            const response = await axios.post(`http://127.0.0.1:8001/api/registration/wishlist/`, userData, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
                     // Include CSRF token in headers
                     'X-CSRFToken': csrfToken,
                 },

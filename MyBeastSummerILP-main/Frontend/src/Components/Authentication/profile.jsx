@@ -7,8 +7,12 @@ import UseFetchProfile from '../../hooks/useFetchProfile';
 
 function PersonalInfo() {
   const [profile, setProfile] = useState({
+    ldap: '',
+    username: '',
+    email: '',
+    roll_number: '',
+    hostel_number: '',
     linkedin: '',
-    personal_email: '',
     asc_ss_link: '',
     projects: '',
     internships: '',
@@ -25,16 +29,7 @@ function PersonalInfo() {
   const { editProfile, loading, error, success } = UseEditProfile();
   const { fetchProfile, fetchedProfile } = UseFetchProfile();
 
- 
 
-
-  const handleSubmit = (event) => {
-
-    const accessToken = localStorage.getItem('accessToken');
-    profile.accessToken = accessToken;
-
-    editProfile(profile);
-  };
 
   const [check, setCheck] = useState(false);
   const [error1, setError1] = useState(null);
@@ -46,25 +41,31 @@ function PersonalInfo() {
   };
 
 
-  useEffect(() => {
-    setError1(validateEmail(profile.personal_email) ? null : "Please enter a valid email address");
-    if(!error1){
-      setCheck(true);
-    }else{
-      setCheck(false);
-    }
-  }, [profile])
+  // useEffect(() => {
+  //   setError1(validateEmail(profile.personal_email) ? null : "Please enter a valid email address");
+  //   if(!error1){
+  //     setCheck(true);
+  //   }else{
+  //     setCheck(false);
+  //   }
+  // }, [profile])
 
 
   useEffect(() => {
     fetchProfile();
+    // console.log(x);
   }, [])
 
   useEffect(() => {
     if (fetchedProfile) {
       const newProfile = {
+        ldap: fetchedProfile?.ldap,
+        username: fetchedProfile?.username,
+        email: fetchedProfile?.email,
+        roll_number: fetchedProfile?.roll_number,
+        hostel_number: fetchedProfile?.hostel_number,
         linkedin: fetchedProfile?.linkedin,
-        personal_email: fetchedProfile?.personal_email,
+        // personal_email: fetchedProfile?.personal_email,
         sop: fetchedProfile?.sop,
         resume_link: fetchedProfile?.resume_link,
         asc_ss_link: fetchedProfile?.asc_ss_link,
@@ -77,7 +78,16 @@ function PersonalInfo() {
     }
   }, [fetchedProfile])
 
+  const handleSubmit = (event) => {
 
+    // const accessToken = localStorage.getItem('accessToken');
+    // profile.accessToken = accessToken;
+    profile.id = fetchedProfile?.id;
+    profile.user_id = fetchedProfile?.user_id;
+
+    editProfile(profile);
+  };
+  
   const styles = {
 
     '@media (max-width: 600px)': {
@@ -188,6 +198,66 @@ function PersonalInfo() {
       <div className="profileformmain">
         <div className="profileform-container" style={styles.formContainer}>
           <div className="pinfo align-items-center">
+          <div className="pinfo-constituents" style={styles.constituents}>
+              <label htmlFor="Field9" style={styles.profilelabel}>LDAP:</label>
+              <input
+                // id="Field9"
+                name="ldap"
+                type="text"
+                className="field text fn"
+                value={profile.ldap}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
+            </div>
+            <div className="pinfo-constituents" style={styles.constituents}>
+              <label htmlFor="Field9" style={styles.profilelabel}>Name:</label>
+              <input
+                // id="Field9"
+                name="name"
+                type="text"
+                className="field text fn"
+                value={profile.username}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
+            </div>
+            <div className="pinfo-constituents" style={styles.constituents}>
+              <label htmlFor="Field9" style={styles.profilelabel}>Personal Email:</label>
+              <input
+                id="Field9"
+                name="email"
+                type="text"
+                className="field text fn"
+                value={profile.email}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
+            </div>
+            <div className="pinfo-constituents" style={styles.constituents}>
+              <label htmlFor="Field9" style={styles.profilelabel}>Roll Number:</label>
+              <input
+                // id="Field9"
+                name="roll_number"
+                type="text"
+                className="field text fn"
+                value={profile.roll_number}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
+            </div>
+            <div className="pinfo-constituents" style={styles.constituents}>
+              <label htmlFor="Field9" style={styles.profilelabel}>Hostel Number:</label>
+              <input
+                // id="Field9"
+                name="hostel_number"
+                type="text"
+                className="field text fn"
+                value={profile.hostel_number}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
+            </div>
             <div className="pinfo-constituents" style={styles.constituents}>
               <label htmlFor="Field9" style={styles.profilelabel}>LinkedIn Profile Link*:</label>
               <input
@@ -200,7 +270,7 @@ function PersonalInfo() {
                 style={styles.input}
               />
             </div>
-            <div className="pinfo-constituents" style={styles.constituents}>
+            {/* <div className="pinfo-constituents" style={styles.constituents}>
               <label htmlFor="Field10" style={styles.profilelabel}>Personal Email*:</label>
               <input
                 id="Field10"
@@ -212,7 +282,7 @@ function PersonalInfo() {
                 style={styles.input}
                 required
               />
-            </div>
+            </div> */}
           </div>
 
 
@@ -313,7 +383,7 @@ function PersonalInfo() {
 
 
           <div style={styles.textCenter}>
-            <button disabled={!check} onClick={handleSubmit} className="submit-button" style={styles.submitButton}>
+            <button disabled={check} onClick={handleSubmit} className="submit-button" style={styles.submitButton}>
               Save
             </button>
           </div>

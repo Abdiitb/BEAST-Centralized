@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Profile
 
 User = get_user_model()
-
+#
 class RegisterUserView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -28,12 +28,16 @@ class LoginView(APIView):
         password = request.data.get('password')
         user = authenticate(username=ldap, password=password)
 
-        if user:
+        if user.is_active and user.is_verified:
             refresh = RefreshToken.for_user(user)
             return Response({
                 "access": str(refresh.access_token),
                 "refresh": str(refresh)
             })
+        
+        elif not user.is_active and not user.is_verified:
+            return Response({"error": "User not verified, please verify your account from your webmail"}, status=status.HTTP_401_UNAUTHORIZED)
+        
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     
 class VerifyEmailView(APIView):
@@ -65,14 +69,11 @@ class ProfileView(APIView):
 
     def get(self, request):
         """
-        Handle GET request to fetch user profile details.
+        Handle GET request to fetch user profile details, including associated User data.
         """
-        try:
-            profile = request.user.profile  # Fetch the profile of the logged-in user
-            serializer = ProfileSerializer(profile)  # Serialize the profile data
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Profile.DoesNotExist:
-            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        profile = get_object_or_404(Profile.objects.select_related("user"), user=request.user)
+        serializer = ProfileSerializer(profile)  # Serialize profile and nested user data
+        return Response(serializer.data, status=status.HTTP_200_OK)
         
     def put(self, request):
         """

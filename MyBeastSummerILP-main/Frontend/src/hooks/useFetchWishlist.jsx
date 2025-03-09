@@ -21,12 +21,13 @@ const UseFetchWishlist = () => {
 
             // You don't need to include CSRF token for GET requests
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/registration/wishlist/`, {
-                params: {
-                    accessToken: accessToken,
-                },
+            const response = await axios.get(`http://127.0.0.1:8001/api/registration/wishlist/`, {
+                // params: {
+                //     accessToken: accessToken,
+                // },
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             })
 

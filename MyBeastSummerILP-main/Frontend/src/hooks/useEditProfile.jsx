@@ -17,11 +17,13 @@ const UseEditProfile = () => {
       // Get CSRF token from cookies
       const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
       const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
+      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('http://127.0.0.1:8000/api/authentication/profile/', {
+      const response = await fetch('http://127.0.0.1:8001/api/authentication/profile/', {
         method:'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
           'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify(userData),
