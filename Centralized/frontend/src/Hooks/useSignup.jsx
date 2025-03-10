@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
 const UseSignup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,7 +17,7 @@ const UseSignup = () => {
       const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
       const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-      const response = await fetch('http://127.0.0.1:8000/api/authentication/register/', {
+      const response = await fetch(`http://localhost:8000/api/authentication/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

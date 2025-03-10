@@ -3,6 +3,9 @@ import { json } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseFetchWishlist = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -21,7 +24,7 @@ const UseFetchWishlist = () => {
 
             // You don't need to include CSRF token for GET requests
 
-            const response = await axios.get(`http://127.0.0.1:8001/api/registration/wishlist/`, {
+            const response = await axios.get(`${apiUrl}/api/registration/wishlist/`, {
                 // params: {
                 //     accessToken: accessToken,
                 // },

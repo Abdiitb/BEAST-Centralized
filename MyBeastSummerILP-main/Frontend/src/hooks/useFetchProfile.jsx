@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseFetchProfile = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -15,7 +18,7 @@ const UseFetchProfile = () => {
         try {
             const accessToken = localStorage.getItem('accessToken');
 
-            const response = await axios.get(`http://127.0.0.1:8001/api/authentication/profile/`, {
+            const response = await axios.get(`${apiUrl}/api/authentication/profile/`, {
                 // params: {
                 //     accessToken: accessToken,
                 // },

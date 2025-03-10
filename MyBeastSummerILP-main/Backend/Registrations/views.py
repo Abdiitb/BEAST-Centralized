@@ -13,13 +13,13 @@ from email.mime.image import MIMEImage
 import smtplib
 import os
 import requests
-
+from django.conf import settings
 
 class RegistrationAPIView(APIView):
     def post(self, request):
         token = request.headers.get("Authorization")
         try:
-            user_data = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json()
+            user_data = requests.get(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={'Authorization': token}).json()
             user = Profile.objects.get(id=user_data.get('id'))
             # print(user)
             if(not user):
@@ -52,7 +52,7 @@ class WishListAPIView(APIView):
     def post(self, request):
         token = request.headers.get("Authorization")
         try:
-            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user_id = requests.get(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
             user = Profile.objects.get(id=user_id)
         except Exception as e:
             print("Error while verifying user", e)
@@ -76,7 +76,7 @@ class WishListAPIView(APIView):
     def get(self, request):
         token = request.headers.get("Authorization")
         try:
-            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user_id = requests.get(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
             user = Profile.objects.get(id=user_id)
             
             wishlist = WishList.objects.get(user=user)
@@ -105,7 +105,7 @@ class WishListAPIView(APIView):
     def put(self, request):
         token = request.headers.get("Authorization")
         try:
-            user_id = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user_id = requests.get(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
             user = Profile.objects.get(id=user_id)
             # print('user :', user)
         except Exception as e:

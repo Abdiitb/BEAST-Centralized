@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseAddToWishlist = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -22,7 +25,7 @@ const UseAddToWishlist = () => {
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-            const response = await axios.put(`http://127.0.0.1:8001/api/registration/wishlist/`, userData, {
+            const response = await axios.put(`${apiUrl}/api/registration/wishlist/`, userData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,

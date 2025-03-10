@@ -3,6 +3,9 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { AuthContext } from '../Contexts/AuthContext';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+// console.log(apiUrl);  // It will print: http://localhost:8000/api
+
 const UseLogin = () => {
     const { setLoggedIn } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
@@ -19,7 +22,8 @@ const UseLogin = () => {
             // Get CSRF token from cookies
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
-            const response = await fetch('http://127.0.0.1:8000/api/authentication/login/', {
+            // const response = await fetch(`${apiUrl}/api/authentication/login/`, {
+            const response = await fetch(`http://localhost:8000/api/authentication/login/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

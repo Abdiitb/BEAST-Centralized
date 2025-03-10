@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 // import UseRegisterMentors from '../mentorcards/mentorcards.jsx';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseRegisterProjects = (props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,7 +24,7 @@ const UseRegisterProjects = (props) => {
       const accessToken = localStorage.getItem('accessToken');
       console.log('userData in registerProjects:', userData);
 
-      const response = await fetch('http://127.0.0.1:8001/api/registration/register/', {
+      const response = await fetch(`${apiUrl}/api/registration/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -76,22 +76,22 @@ class Profile(models.Model):
     # profile_picture = models.ImageField(upload_to="profile_pictures/", blank=True, null=True)  # User's profile picture
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional phone number
 
-    def save(self, *args, **kwargs):
-        """Save to all databases when a profile is updated."""
-        super().save(*args, **kwargs)  # Save to the default (centralized) database
+    # def save(self, *args, **kwargs):
+    #     """Save to all databases when a profile is updated."""
+    #     super().save(*args, **kwargs)  # Save to the default (centralized) database
 
-        # Synchronize changes to subsidiary databases
-        for db in ['ilp']:
-            with connections[db].cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO Authentication_profile (user_id, bio, phone_number)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (user_id) DO UPDATE
-                    SET bio = EXCLUDED.bio, phone_number = EXCLUDED.phone_number
-                    """,
-                    [self.user_id, self.bio, self.phone_number]
-                )
+    #     # Synchronize changes to subsidiary databases
+    #     for db in ['ilp']:
+    #         with connections[db].cursor() as cursor:
+    #             cursor.execute(
+    #                 """
+    #                 INSERT INTO Authentication_profile (user_id, bio, phone_number)
+    #                 VALUES (%s, %s, %s)
+    #                 ON CONFLICT (user_id) DO UPDATE
+    #                 SET bio = EXCLUDED.bio, phone_number = EXCLUDED.phone_number
+    #                 """,
+    #                 [self.user_id, self.bio, self.phone_number]
+    #             )
 
     def __str__(self):
         """

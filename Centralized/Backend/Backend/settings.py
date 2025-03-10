@@ -10,23 +10,54 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
+# from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# # Quick-start development settings - unsuitable for production
+# # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = "django-insecure-eyi%%1_r0qk_g5qx9ca+g=!h$4=@)ps78o3cwfo22-_ilm2rlj"
+
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+
+# ALLOWED_HOSTS = []
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Read API Base URL from environment variable
+# API_BASE_URL = os.getenv('REACT_APP_API_URL', 'http://localhost:8000')  # default to local in development
+API_BASE_URL = 'http://localhost:8000'
+
+# Load environment variables
+ENV_MODE = os.getenv('ENV_MODE', 'dev')  # Default to 'dev' if ENV_MODE is not set
+ENV_FILE = f"/app/.env.{ENV_MODE}"  # Docker mounts .env file here
+
+if os.path.exists(ENV_FILE):
+    load_dotenv(dotenv_path=ENV_FILE)
+
+# Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Secret Key
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-eyi%%1_r0qk_g5qx9ca+g=!h$4=@)ps78o3cwfo22-_ilm2rlj"
-
-# SECURITY WARNING: don't run with debug turned on in production!
+# Debug Mode
+# DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# Allowed Hosts
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = ["*", 'localhost',
+    '127.0.0.1',
+    'backend_centralized',  # Add the service name
+    '[::1]']
 
 # Application definition
 
@@ -99,6 +130,15 @@ DATABASES = {
     #     "ENGINE": "django.db.backends.sqlite3",
     #     "NAME": BASE_DIR / "db.sqlite3",
     # }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.getenv("POSTGRES_DB"),
+    #     'USER': os.getenv("POSTGRES_USER"),
+    #     'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
+    #     'HOST': os.getenv("DB_HOST"),
+    #     'PORT': os.getenv("DB_PORT", 5432),
+    # },
+
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'centralized',
@@ -108,14 +148,14 @@ DATABASES = {
         'PORT': '5432',
     },
 
-    'ilp': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ilp',
-        'USER': 'aryan',
-        'PASSWORD': 'centralized',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    # 'ilp': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'ilp',
+    #     'USER': 'aryan',
+    #     'PASSWORD': 'centralized',
+    #     'HOST': 'localhost',
+    #     'PORT': '5432',
+    # }
 }
 
 
@@ -171,5 +211,12 @@ EMAIL_HOST_PASSWORD = "cbgn zldz jdxs cqed"  # Use an App Password if 2FA is ena
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 DATABASE_ROUTERS = ['Backend.database_router.ProfileRouter']
+
+# Static and Media File Settings
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # collectstatic will move here
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 
 

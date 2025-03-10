@@ -1,23 +1,39 @@
-# Use the official Node.js image as base
-FROM node:20.0.0 as build
+# Base Stage: Use Node.js for both development and production
+FROM node:20.0.0 AS base
 
-# Create and set the working directory
-WORKDIR /frontend_ilp_winter
+# Set the working directory
+WORKDIR /frontend
 
-# Copy package.json and yarn.lock to the container
-COPY package.json yarn.lock /frontend_ilp_winter/
+# Copy package.json and package-lock.json for dependency installation
+COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN yarn install
+RUN npm install --legacy-peer-deps
 
-# Copy the frontend project files to the container
-COPY . /frontend_ilp_winter/
+# Copy the rest of the application code
+COPY . .
 
-# Build the frontend app
-RUN yarn build
+# Build Stage: Create production assets
+FROM base AS build
+RUN npm run build
 
-# Use a lightweight web server to serve the built frontend app
-RUN yarn global add serve
+# Final Stage: Serve with NGINX for production or start the dev server
+FROM nginx:alpine AS final
 
-# Command to serve the built app
-CMD ["serve", "-s", "build", "-l", "5016"]
+# Set environment variable to determine if running in dev or prod
+ENV ENV_MODE=prod
+
+# For production, copy the build output to NGINX's html directory
+COPY --from=build /frontend/build /usr/share/nginx/html
+
+# For development, keep Node.js runtime in the base image
+COPY --from=base --chmod=755 /frontend /frontend
+
+# Install Node.js and npm in the final image if running in dev mode
+RUN apk add --no-cache nodejs npm
+
+# Expose port for both development (3000) and production (80)
+EXPOSE 4000
+
+# Command to switch between dev and prod mode
+CMD ["sh", "-c", "if [ \"$ENV_MODE\" = \"dev\" ]; then cd /frontend && npm start; else nginx -g 'daemon off;'; fi"]

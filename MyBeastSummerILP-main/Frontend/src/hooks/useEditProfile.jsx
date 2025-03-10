@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseEditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,7 +22,7 @@ const UseEditProfile = () => {
       const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
       const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('http://127.0.0.1:8001/api/authentication/profile/', {
+      const response = await fetch(`${apiUrl}/api/authentication/profile/`, {
         method:'POST',
         headers: {
           'Content-Type': 'application/json',

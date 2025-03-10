@@ -3,6 +3,9 @@ import { json } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseFetchBlog = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -22,7 +25,7 @@ const UseFetchBlog = () => {
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-            axios.get(`http://127.0.0.1:8001/api/blog/fetch`, userData , {
+            axios.get(`${apiUrl}/api/blog/fetch`, userData , {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken,

@@ -10,13 +10,14 @@ from .serializers import ProjectSerializer
 from Registrations.models import WishList
 from Authentication.models import Profile
 import requests
+from django.conf import settings
     
 class ProjectListAPIView(APIView):
     
     def get(self, request, format=None, field=None):
         token = request.headers.get("Authorization")
         try:
-            user = requests.get('http://127.0.0.1:8001/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
+            user = requests.get(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={'Authorization': token}).json().get('id')
             # print(user)
             # if(user.is_active == False):
             #     return Response("User not verified", status=status.HTTP_400_BAD_REQUEST)

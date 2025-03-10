@@ -3,6 +3,9 @@ import { json } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = 'http://localhost:8001';
+
 const UseFetchProjects = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -24,7 +27,7 @@ const UseFetchProjects = () => {
             const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
             const csrfToken = csrfTokenMatch ? csrfTokenMatch[1] : 'DUMMY_CSRF_TOKEN';
 
-            axios.get(`http://127.0.0.1:8001/api/projects/`,{
+            axios.get(`${apiUrl}/api/projects/`,{
                 headers: {
                     'Content-Type': 'application/json',
                     // Include CSRF token in headers

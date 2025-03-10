@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from Projects.options import HOSTEL_CHOICES 
 import requests
+from django.conf import settings
 # class User(models.Model):
 #     fullname = models.CharField(max_length=100)
 #     ldap = models.EmailField(max_length=100, unique=True)
@@ -46,21 +47,21 @@ class Profile(models.Model):
     pors = models.CharField(max_length=5000, blank=True, null=True)
 
     # Subsidiary has additional fields, but we only sync common ones
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Save profile first
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)  # Save profile first
 
-        # Send update to subsidiary website
-        try:
-            data = {
-                "user_id": str(self.user_id),
-                "username": self.username,
-                "email": self.email,
-                "roll_number": self.roll_number,
-                "hostel_number": self.hostel_number
-            }
-            requests.post("http://127.0.0.1:8000/api/authentication/profile_update/", json=data)
-        except Exception as e:
-            print("Error sending update to subsidiary:", e)
+    #     # Send update to subsidiary website
+    #     try:
+    #         data = {
+    #             "user_id": str(self.user_id),
+    #             "username": self.username,
+    #             "email": self.email,
+    #             "roll_number": self.roll_number,
+    #             "hostel_number": self.hostel_number
+    #         }
+    #         requests.post(f"{settings.CENTRAL_API_BASE}/api/authentication/profile_update/", json=data)
+    #     except Exception as e:
+    #         print("Error sending update to subsidiary:", e)
 
     def __str__(self):
         return self.username + " " + self.ldap

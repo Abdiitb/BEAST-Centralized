@@ -1,33 +1,59 @@
-version: '2.2'
-
 services:
-  ilpsummerbackend:
-    restart: unless-stopped
+  # Frontend service
+  frontend_ilp:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    env_file:
+      - .env.${ENV_MODE}
+    ports:
+      - "3001:4000"
+    depends_on:
+      - backend_ilp
+
+  # Backend service
+  backend_ilp:
     build:
       context: ./Backend
       dockerfile: Dockerfile
-    ports:
-      - "8024:8000"
-    entrypoint: /Backend/wsgi-entrypoint.sh
+    env_file:
+      - .env.${ENV_MODE}
     volumes:
-      - ./Backend:/Backend/
-    expose:
-      - 8000
+      - ./Backend:/backend
+    ports:
+      - "8001:6000"
     networks:
-      - mynetwork
-  
+      - ilp_network
+      - shared_net
+    depends_on:
+      - db_ilp
 
-  ilpsummerfrontend:
+  # PostgreSQL database service
+  db_ilp:
+    image: postgres:17
+    env_file:
+      - .env.${ENV_MODE}
+    networks:
+      - ilp_network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Nginx service
+  nginx_ilp:
     build:
-      context: ./Frontend
+      context: ./nginx
       dockerfile: Dockerfile
     ports:
-      - "5016:5016"
-    volumes:
-      - ./Frontend:/Frontend
-    networks:
-      - mynetwork
+      - "8024:80"
+    depends_on:
+      - frontend_ilp
+      - backend_ilp
+
+volumes:
+  pgdata:
 
 networks:
-  mynetwork:
-    name: yearbook23_mynetwork
+  ilp_network:
+    driver: bridge
+  shared_net:
+    external: true

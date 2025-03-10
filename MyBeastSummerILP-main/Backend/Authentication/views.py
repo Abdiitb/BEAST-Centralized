@@ -11,6 +11,7 @@ import requests
 # from email.mime.text import MIMEText
 # from email.mime.image import MIMEImage
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 # import smtplib
 # import os
 
@@ -49,8 +50,11 @@ from django.shortcuts import get_object_or_404
 #             print("Error while verifying token", e)
 #             return Response("No user found, please signup",status=status.HTTP_400_BAD_REQUEST)
 
-CENTRAL_AUTH_URL = "http://127.0.0.1:8000/api/authentication/profile/"
-CENTRAL_TOKEN_URL = "http://127.0.0.1:8000/api/authentication/login/"
+CENTRAL_AUTH_URL = f"{settings.CENTRAL_API_BASE}/api/authentication/profile/"
+CENTRAL_TOKEN_URL = f"{settings.CENTRAL_API_BASE}/api/authentication/login/"
+
+print('CENTRAL_AUTH_URL :', CENTRAL_AUTH_URL)
+print('CENTRAL_TOKEN_URL :', CENTRAL_TOKEN_URL)
 
 def fetch_user_from_api(url,token):
         """Fetch user details from the centralized authentication system."""
@@ -67,8 +71,8 @@ class LoginView(APIView):
         """Authenticate the user via the centralized system and return a JWT token."""
 
         # Debugging: Print request body received by Django
-        print("Received Request Body:", request.body)  # Raw data
-        print("Received Request Data:", request.data)  # Parsed data
+        # print("Received Request Body:", request.body)  # Raw data
+        # print("Received Request Data:", request.data)  # Parsed data
 
         ldap = request.data.get("ldap")
         password = request.data.get("password")
@@ -85,23 +89,22 @@ class LoginView(APIView):
             accessToken = response.json().get("access")  # Assuming the response contains an access token
             refreshToken = response.json().get("refresh")  # Assuming the response contains a refresh token
 
-            user_profile_ilp = fetch_user_from_api("http://127.0.0.1:8001/api/authentication/profile/", f"Bearer {accessToken}")
+            user_profile_ilp = fetch_user_from_api(f"{settings.API_BASE_URL}/api/authentication/profile/", f"Bearer {accessToken}")
 
-            print("ILP API Response:", user_profile_ilp)
+            # print("ILP API Response:", user_profile_ilp)
 
             if not user_profile_ilp:
                 user_profile_centralized = fetch_user_from_api(CENTRAL_AUTH_URL, f"Bearer {accessToken}")
 
-                print("Central API Response:", user_profile_centralized)
+                # print("Central API Response:", user_profile_centralized)
 
-                response_profile = requests.post('http://127.0.0.1:8001/api/authentication/profile/', headers={"Authorization": f"Bearer {accessToken}"})
+                response_profile = requests.post(f'{settings.API_BASE_URL}/api/authentication/profile/', headers={"Authorization": f"Bearer {accessToken}"})
 
-                print("ILP API Response for Profile:", response_profile)
+                # print("ILP API Response for Profile:", response_profile)
             return Response({"accessToken": accessToken, "refreshToken": refreshToken}, status=status.HTTP_200_OK)
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+    
 class ProfileView(APIView):
 
     def get(self, request):
@@ -174,7 +177,7 @@ class ProfileView(APIView):
         if not token:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        user_data = fetch_user_from_api('http://127.0.0.1:8001/api/authentication/profile/', token)
+        user_data = fetch_user_from_api(f'{settings.API_BASE_URL}/api/authentication/profile/', token)
         if not user_data:
             return Response({"error": "Invalid token or user not found"}, status=status.HTTP_401_UNAUTHORIZED)
 
