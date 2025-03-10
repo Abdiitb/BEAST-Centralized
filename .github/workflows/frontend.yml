@@ -58,11 +58,6 @@ jobs:
         run: |
           npm install --legacy-peer-deps
 
-      - name: Update caniuse-lite
-        working-directory: ./MyBeastSummerILP-main/Frontend
-        run: |
-          npx update-browserslist-db@latest --force
-
       - name: Build Project
         working-directory: ./MyBeastSummerILP-main/Frontend
         run: |
