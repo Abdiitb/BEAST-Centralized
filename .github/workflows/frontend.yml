@@ -1,0 +1,72 @@
+name: CI/CD Pipeline for Vercel Hosting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-centralized:
+    name: Deploy Centralized Website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: ./Centralized/frontend
+        run: |
+          npm install
+
+      - name: Build Project
+        working-directory: ./Centralized/frontend
+        run: |
+          npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod --yes'
+          working-directory: ./Centralized/frontend
+          project-id: ${{ secrets.VERCEL_PROJECT_ID_CENTRALIZED }}
+
+  deploy-ilp:
+    name: Deploy ILP Website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        working-directory: ./MyBeastSummerILP-main/Frontend
+        run: |
+          npm install --legacy-peer-deps
+
+      - name: Build Project
+        working-directory: ./MyBeastSummerILP-main/Frontend
+        run: |
+          CI=false npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod --yes'
+          working-directory: ./MyBeastSummerILP-main/Frontend
+          project-id: ${{ secrets.VERCEL_PROJECT_ID_SUBSIDIARY }}
