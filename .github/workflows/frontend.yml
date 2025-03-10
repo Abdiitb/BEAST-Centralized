@@ -54,9 +54,9 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        working-directory: ./frontend
+        working-directory: ./MyBeastSummerILP-main/Frontend
         run: |
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Update caniuse-lite
         working-directory: ./MyBeastSummerILP-main/Frontend
